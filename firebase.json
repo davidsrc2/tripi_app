@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"tripi-auth","appId":"1:475715806123:android:4ff6e855ed413f3664a8ee","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"tripi-auth","configurations":{"android":"1:475715806123:android:4ff6e855ed413f3664a8ee","ios":"1:475715806123:ios:6ef0682a86c58e4f64a8ee"}}}}}}

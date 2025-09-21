@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "475715806123",
+    "project_id": "tripi-auth",
+    "storage_bucket": "tripi-auth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:475715806123:android:4ff6e855ed413f3664a8ee",
+        "android_client_info": {
+          "package_name": "com.tripi.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "475715806123-4litofolcl7n83pfgl8s5s812uikn7tl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBob288R1XeHvDoe-DMWsYy64o8QgVHpYk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "475715806123-4litofolcl7n83pfgl8s5s812uikn7tl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
