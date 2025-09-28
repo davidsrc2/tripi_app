@@ -8,6 +8,8 @@ import 'features/auth/auth_controller.dart';
 import 'features/auth/login_page.dart';
 import 'features/home/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'features/users/users_controller.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +28,8 @@ class TripiApp extends StatelessWidget {
         Provider(create: (_) => TripiApi()),
         ChangeNotifierProvider(create: (ctx) =>
             AuthController(ctx.read<AuthRepository>(), ctx.read<TripiApi>())),
+        ChangeNotifierProvider(create: (ctx) => UsersController(ctx.read<TripiApi>())),
+
       ],
       child: MaterialApp(
         title: 'Tripi',
