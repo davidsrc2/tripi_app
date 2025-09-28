@@ -11,6 +11,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
+  // 👇 controlador para el buscador
+  final _searchCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose(); // 👈 importante
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -65,9 +74,18 @@ class _HomePageState extends State<HomePage> {
                 alignment: const Alignment(0, -0.78),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _SearchBar(),
+                  child: _SearchBar(
+                    controller: _searchCtrl,
+                    onSubmitted: (q) {
+                      // TODO: navega a tu página de resultados, por ahora solo ejemplo:
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Buscando: $q')),
+                      );
+                    },
+                  ),
                 ),
               ),
+
 
               // --- Planeta central ---
               Align(
@@ -103,17 +121,21 @@ class _HomePageState extends State<HomePage> {
 // ---------------- Widgets de la pantalla ----------------
 
 class _SearchBar extends StatelessWidget {
+  final TextEditingController? controller;
+  final ValueChanged<String>? onSubmitted;
+
+  const _SearchBar({this.controller, this.onSubmitted});
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Material(
       elevation: 0,
       color: Colors.transparent,
       child: TextField(
-        readOnly: true, // de momento solo estilo
-        onTap: () {
-          // TODO: Navegar a pantalla de búsqueda si procede
-        },
+        controller: controller,
+        readOnly: false, // 👈 ahora se puede escribir
+        textInputAction: TextInputAction.search,
+        onSubmitted: onSubmitted,
         decoration: InputDecoration(
           hintText: '¿Dónde vamos?',
           prefixIcon: const Icon(Icons.travel_explore_rounded),
@@ -125,11 +147,21 @@ class _SearchBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
           ),
+          // botón de limpiar texto (opcional)
+          suffixIcon: (controller?.text.isNotEmpty ?? false)
+              ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    controller?.clear();
+                  },
+                )
+              : null,
         ),
       ),
     );
   }
 }
+
 
 class _Planet extends StatelessWidget {
   @override
