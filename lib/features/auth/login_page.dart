@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'auth_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-
+import '../home/home_page.dart'; // 👈 import Home
 
 enum _AuthView { welcome, signIn, signUp }
 
@@ -29,6 +28,19 @@ class _LoginPageState extends State<LoginPage> {
     _pass.dispose();
     _username.dispose();
     super.dispose();
+  }
+
+  void _goHome() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const HomePage()),
+      (route) => false,
+    );
+  }
+
+  Future<void> _handleError(Object e) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Algo fue mal: $e')),
+    );
   }
 
   @override
@@ -102,7 +114,17 @@ class _LoginPageState extends State<LoginPage> {
 
                         // Social buttons
                         _SocialButtons(
-                          onGoogle: ctrl.loading ? null : () => context.read<AuthController>().signInGoogle(),
+                          onGoogle: ctrl.loading
+                              ? null
+                              : () async {
+                                  try {
+                                    await context.read<AuthController>().signInGoogle();
+                                    if (!mounted) return;
+                                    _goHome();
+                                  } catch (e) {
+                                    await _handleError(e);
+                                  }
+                                },
                           onApple: ctrl.loading
                               ? null
                               : () {
@@ -160,20 +182,27 @@ class _LoginPageState extends State<LoginPage> {
                             onPressed: ctrl.loading
                                 ? null
                                 : () async {
-                                    if (_view == _AuthView.signIn) {
-                                      await context.read<AuthController>()
-                                          .signInEmail(_email.text.trim(), _pass.text);
-                                    } else {
-                                      final uname = _username.text.trim().isEmpty
-                                          ? (_email.text.contains('@')
-                                              ? _email.text.split('@').first
-                                              : _email.text)
-                                          : _username.text.trim();
-                                      await context.read<AuthController>().signUpAndRegisterBO(
-                                            email: _email.text.trim(),
-                                            password: _pass.text,
-                                            username: uname,
-                                          );
+                                    try {
+                                      if (_view == _AuthView.signIn) {
+                                        await context
+                                            .read<AuthController>()
+                                            .signInEmail(_email.text.trim(), _pass.text);
+                                      } else {
+                                        final uname = _username.text.trim().isEmpty
+                                            ? (_email.text.contains('@')
+                                                ? _email.text.split('@').first
+                                                : _email.text)
+                                            : _username.text.trim();
+                                        await context.read<AuthController>().signUpAndRegisterBO(
+                                              email: _email.text.trim(),
+                                              password: _pass.text,
+                                              username: uname,
+                                            );
+                                      }
+                                      if (!mounted) return;
+                                      _goHome(); // 👈 navegar tras éxito
+                                    } catch (e) {
+                                      await _handleError(e);
                                     }
                                   },
                             child: Text(
@@ -207,7 +236,17 @@ class _LoginPageState extends State<LoginPage> {
 
                         const SizedBox(height: 18),
                         _SocialButtons(
-                          onGoogle: ctrl.loading ? null : () => context.read<AuthController>().signInGoogle(),
+                          onGoogle: ctrl.loading
+                              ? null
+                              : () async {
+                                  try {
+                                    await context.read<AuthController>().signInGoogle();
+                                    if (!mounted) return;
+                                    _goHome();
+                                  } catch (e) {
+                                    await _handleError(e);
+                                  }
+                                },
                           onApple: ctrl.loading
                               ? null
                               : () {
@@ -347,10 +386,10 @@ class _SocialButtons extends StatelessWidget {
 
   const _SocialButtons({this.onApple, this.onGoogle});
 
-          @override
-          Widget build(BuildContext context) {
-            return Column(
-              children: [
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
         _SocialButton(
           label: 'Inicia sesión con Apple',
           leading: const FaIcon(FontAwesomeIcons.apple, color: Colors.black),
@@ -418,4 +457,5 @@ class _GoogleG extends StatelessWidget {
     );
   }
 }
+
 

@@ -6,10 +6,8 @@ import 'data/auth_repository.dart';
 import 'data/tripi_api.dart';
 import 'features/auth/auth_controller.dart';
 import 'features/auth/login_page.dart';
-import 'features/home/home_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'features/home/home_page.dart'; // <- puedes dejarlo importado para navegar tras login
 import 'features/users/users_controller.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,25 +24,19 @@ class TripiApp extends StatelessWidget {
       providers: [
         Provider(create: (_) => AuthRepository()),
         Provider(create: (_) => TripiApi()),
-        ChangeNotifierProvider(create: (ctx) =>
-            AuthController(ctx.read<AuthRepository>(), ctx.read<TripiApi>())),
+        ChangeNotifierProvider(
+          create: (ctx) => AuthController(ctx.read<AuthRepository>(), ctx.read<TripiApi>()),
+        ),
         ChangeNotifierProvider(create: (ctx) => UsersController(ctx.read<TripiApi>())),
-
       ],
       child: MaterialApp(
         title: 'Tripi',
         theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF0d6efd)),
-        home: StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return const Scaffold(body: Center(child: CircularProgressIndicator()));
-            }
-            return snap.data == null ? const LoginPage() : const HomePage();
-          },
-        ),
+        // 🔹 Siempre arranca en Login
+        home: const LoginPage(),
       ),
     );
   }
 }
+
 
