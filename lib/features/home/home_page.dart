@@ -1,5 +1,6 @@
 // lib/features/home/home_page.dart
 import 'package:flutter/material.dart';
+import '../map/map_page.dart'; // Requiere lib/features/map/map_page.dart (flutter_map / OSM)
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,19 +12,30 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  // 👇 controlador para el buscador
+  // Controlador del buscador
   final _searchCtrl = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Redibujar para mostrar/ocultar el botón de limpiar según haya texto
+    _searchCtrl.addListener(() => setState(() {}));
+  }
+
+  @override
   void dispose() {
-    _searchCtrl.dispose(); // 👈 importante
+    _searchCtrl.dispose();
     super.dispose();
+  }
+
+  void _openMap() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const MapPage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
@@ -42,10 +54,10 @@ class _HomePageState extends State<HomePage> {
         child: SafeArea(
           child: Stack(
             children: [
-              // --- Estrellas de fondo (ligeras, fijas) ---
+              // Estrellas de fondo
               const _StarsLayer(),
 
-              // --- Cabecera Tripi ---
+              // Cabecera Tripi
               Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
@@ -69,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              // --- Search bar ---
+              // Search bar
               Align(
                 alignment: const Alignment(0, -0.78),
                 child: Padding(
@@ -77,7 +89,7 @@ class _HomePageState extends State<HomePage> {
                   child: _SearchBar(
                     controller: _searchCtrl,
                     onSubmitted: (q) {
-                      // TODO: navega a tu página de resultados, por ahora solo ejemplo:
+                      // TODO: navegar a resultados
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Buscando: $q')),
                       );
@@ -86,18 +98,40 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-
-              // --- Planeta central ---
+              // Planeta central clicable -> abre mapa
               Align(
                 alignment: const Alignment(0, 0.05),
-                child: _Planet(),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: _openMap,
+                      child: const _Planet(),
+                    ),
+                    // Etiqueta "Explorar" para dar pista
+                    Positioned(
+                      bottom: 18,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'Explorar 🌍',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
       ),
 
-      // --- Barra de navegación inferior ---
+      // Barra de navegación inferior
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         child: NavigationBar(
@@ -133,7 +167,7 @@ class _SearchBar extends StatelessWidget {
       color: Colors.transparent,
       child: TextField(
         controller: controller,
-        readOnly: false, // 👈 ahora se puede escribir
+        readOnly: false,
         textInputAction: TextInputAction.search,
         onSubmitted: onSubmitted,
         decoration: InputDecoration(
@@ -147,13 +181,11 @@ class _SearchBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
           ),
-          // botón de limpiar texto (opcional)
+          // botón de limpiar texto
           suffixIcon: (controller?.text.isNotEmpty ?? false)
               ? IconButton(
                   icon: const Icon(Icons.close),
-                  onPressed: () {
-                    controller?.clear();
-                  },
+                  onPressed: () => controller?.clear(),
                 )
               : null,
         ),
@@ -162,59 +194,21 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-
 class _Planet extends StatelessWidget {
+  const _Planet();
+
   @override
   Widget build(BuildContext context) {
-    // Tamaño del planeta adaptado a pantalla
-    final size = MediaQuery.of(context).size;
-    final diameter = size.width * 0.78; // aprox. como el mock
-
-    return Container(
-      width: diameter,
-      height: diameter,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          center: Alignment(-0.2, -0.2),
-          radius: 1.0,
-          colors: [Color(0xFF2F6CF8), Color(0xFF1546C8)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 24,
-            spreadRadius: 2,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Brillo sutil
-          Positioned(
-            left: diameter * 0.14,
-            top: diameter * 0.16,
-            child: Container(
-              width: diameter * 0.42,
-              height: diameter * 0.42,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.12),
-              ),
-            ),
-          ),
-          // Continentes estilizados (simplificados para no depender de assets)
-          CustomPaint(
-            size: Size(diameter, diameter),
-            painter: _ContinentsPainter(),
-          ),
-        ],
-      ),
+    final d = MediaQuery.of(context).size.width * 0.78;
+    return Image.asset(
+      'assets/icons/globe.png',
+      width: d,
+      height: d,
+      fit: BoxFit.contain,
     );
   }
 }
+
 
 class _StarsLayer extends StatelessWidget {
   const _StarsLayer();
@@ -262,47 +256,6 @@ class _StarsLayer extends StatelessWidget {
   }
 }
 
-// ---------------- Painters (continentes simplificados) ----------------
 
-class _ContinentsPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
 
-    // Estas formas son abstractas para simular masas terrestres
-    final w = size.width;
-    final h = size.height;
 
-    // Masa 1 (tipo África/Europa)
-    final p1 = Path()
-      ..moveTo(w * 0.58, h * 0.18)
-      ..quadraticBezierTo(w * 0.75, h * 0.22, w * 0.70, h * 0.36)
-      ..quadraticBezierTo(w * 0.62, h * 0.44, w * 0.58, h * 0.52)
-      ..quadraticBezierTo(w * 0.50, h * 0.56, w * 0.45, h * 0.48)
-      ..quadraticBezierTo(w * 0.48, h * 0.36, w * 0.58, h * 0.18)
-      ..close();
-
-    // Masa 2 (tipo América)
-    final p2 = Path()
-      ..moveTo(w * 0.22, h * 0.35)
-      ..quadraticBezierTo(w * 0.28, h * 0.25, w * 0.38, h * 0.28)
-      ..quadraticBezierTo(w * 0.35, h * 0.40, w * 0.28, h * 0.44)
-      ..quadraticBezierTo(w * 0.22, h * 0.46, w * 0.22, h * 0.35)
-      ..close();
-
-    // Masa 3 (islas)
-    final p3 = Path()
-      ..addOval(Rect.fromCircle(center: Offset(w * 0.68, h * 0.64), radius: w * 0.06))
-      ..addOval(Rect.fromCircle(center: Offset(w * 0.76, h * 0.70), radius: w * 0.035))
-      ..addOval(Rect.fromCircle(center: Offset(w * 0.60, h * 0.68), radius: w * 0.03));
-
-    canvas.drawPath(p1, paint);
-    canvas.drawPath(p2, paint);
-    canvas.drawPath(p3, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
